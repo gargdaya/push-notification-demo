@@ -77,4 +77,47 @@ self.addEventListener('message', (event) => {
   }
 });
 
+
+
+
+self.addEventListener('push', function(event) {
+  console.log('[Service Worker] Push Received.');
+  console.log(`[Service Worker] Push had this data: "${event?event.data?event.data.text():'something is wrong':''}"`);
+
+  const title = 'Push Codelab';
+  const options = {
+    body: 'Yay it works.',
+    // actions: [
+    //   {action: 'explore', title: 'Explore this new world',
+    //     icon: 'download.png'},
+    //   {action: 'close', title: 'I don\'t want any of this',
+    //     icon: 'download.png'},
+    // ]
+    // icon: 'images/icon.png',
+    // badge: 'images/badge.png'
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
 // Any other custom service worker logic can go here.
+self.addEventListener('notificationclick', function(event) {
+  if (!event.action) {
+    // Was a normal notification click
+    console.log('Notification Click.');
+    return;
+  }
+
+  switch (event.action) {
+    case 'explore':
+      console.log('User ❤️️\'s explore.');
+      break;
+    case 'close':
+      console.log('User ❤️️\'s close.');
+      break;
+
+    default:
+      console.log(`Unknown action clicked: '${event.action}'`);
+      break;
+  }
+});

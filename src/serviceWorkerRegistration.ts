@@ -24,6 +24,63 @@ type Config = {
 };
 
 export function register(config?: Config) {
+  const applicationServerPublicKey = 'BLRxR5r8WDHnQckJZyJ7m2mvoyEVrqfihHtB6vxXsbDeQ30U0tzaG9-J-eMxvWEsFO3VViy3ygmWCn7pfmNao78';
+  let isSubscribed = false;
+  let swRegistration: ServiceWorkerRegistration | null = null;
+  const btn = document.getElementById('btn');
+btn?btn.onclick = ()=>{
+  subscribeUser();
+}:console.log("wrong attempt")
+function initializeUI() {
+  // Set the initial subscription value
+  swRegistration?swRegistration.pushManager.getSubscription()
+  .then(function(subscription) {
+    isSubscribed = !(subscription === null);
+
+    if (isSubscribed) {
+      console.log('User IS subscribed.');
+    } else {
+      
+      console.log('User is NOT subscribed.');
+    }
+    
+  }):console.log('something is wrong');
+}
+function urlB64ToUint8Array(base64String: string | any[]) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray; 
+}
+function subscribeUser() {
+  const applicationServerKey = urlB64ToUint8Array(applicationServerPublicKey);
+  swRegistration?swRegistration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: applicationServerKey
+  })
+  .then(function(subscription) {
+    console.log('User is subscribed',subscription);
+
+    
+
+    isSubscribed = true;
+
+   
+  })
+  .catch(function(err) {
+    console.log('Failed to subscribe the user: ', err);
+    
+  }):console.log("something is wrong");
+  ;
+}
   if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
     // The URL constructor is available in all browsers that support SW.
     const publicUrl = new URL(process.env.PUBLIC_URL, window.location.href);
@@ -43,11 +100,32 @@ export function register(config?: Config) {
 
         // Add some additional logging to localhost, pointing developers to the
         // service worker/PWA documentation.
-        navigator.serviceWorker.ready.then(() => {
+        navigator.serviceWorker.ready.then((data) => {
+          swRegistration = data;
           console.log(
             'This web app is being served cache-first by a service ' +
-              'worker. To learn more, visit https://cra.link/PWA'
+              'worker. To learn more, visit https://cra.link/PWA',data
           );
+          initializeUI();
+          var btnnotify = document.querySelector('#ABCD');
+btnnotify?btnnotify.addEventListener('click', function () {
+   navigator.serviceWorker.getRegistration().then(sw => {
+       let options = {
+           body: "Let's buy a SmartPhone!",
+           image:'/icon.jpg',
+           actions: [
+              {action: 'explore', title: 'Explore this new world',
+                icon: '/download.png'},
+              {action: 'close', title: 'I don\'t want any of this',
+                icon: '/preview.png'},
+            ]
+        };
+        sw?sw.showNotification("you want to buy a SmartPhone?", options):console.log("svhb");
+        ;
+        
+   });
+
+}):console.log("sdcvbcb");
         });
       } else {
         // Is not localhost. Just register service worker
